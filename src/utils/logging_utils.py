@@ -2,8 +2,10 @@ import logging
 import os
 
 # Define the log directory relative to this file's location
-LOG_DIR = os.path.join(os.path.dirname(__file__), "/workspaces/Eye_disease/logs")
-LOG_DIR = os.path.abspath(LOG_DIR)
+curr = os.getcwd()
+curr = curr.split('src')[0]
+LOG_DIR = f"{curr}logs"
+print(f'log is{LOG_DIR}')
 print("log Direcotre abspath" ,LOG_DIR)
 
 os.makedirs(LOG_DIR, exist_ok=True)

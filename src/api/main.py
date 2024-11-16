@@ -7,8 +7,10 @@ from fastapi.templating import Jinja2Templates
 
 # Get the absolute path to the directory one level above the current file's directory
 MAIN_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
+print(MAIN_DIR)
 sys.path.append(MAIN_DIR)
-
+MAIN_DIR = MAIN_DIR.split('Eye_disease')[0]
+print(MAIN_DIR)
 # Custom functions and methods
 from utils.logging_utils import app_logger
 from model.load_model import LoadPreTrainedModel
@@ -17,9 +19,9 @@ from prediction.prediction import Prediction
 from PIL import Image
 import base64
 # Load pre-trained model and initialize FastAPI and templates
-MODEL = LoadPreTrainedModel().call(model_path="C:/Users/USER/Desktop/Qufzah/Eye_disease/models/best_model.keras")
+MODEL = LoadPreTrainedModel().call(model_path=f"{MAIN_DIR}/Eye_disease/models/best_model.keras")
 APP = FastAPI()
-TEMPLATES = Jinja2Templates(directory="C:/Users/USER/Desktop/Qufzah/Eye_disease/src/api/templates")
+TEMPLATES = Jinja2Templates(directory=f"{MAIN_DIR}/Eye_disease/src/api/templates")
 
 @APP.get("/", response_class=HTMLResponse)
 async def get_form(request: Request):
