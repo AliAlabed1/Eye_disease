@@ -41,11 +41,11 @@ class Prediction():
             if not isinstance(model, keras.Model):
                 raise TypeError("Provided model is not a valid Keras model.")
 
-            # Check text input
+            # Check image tensor
             if not isinstance(image, tf.Tensor):
                 raise TypeError("Provided image input is not a tf.Tensor.")
 
-            # Predict sentiment
+            # Predict state
             prediction = model.predict(image)
 
             class_labels = {
