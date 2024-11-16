@@ -18,6 +18,8 @@ from preprocessing.process_image import Process_image
 from prediction.prediction import Prediction
 from PIL import Image
 import base64
+from pydantic import BaseModel
+import tensorflow as tf
 # Load pre-trained model and initialize FastAPI and templates
 MODEL = LoadPreTrainedModel().call(model_path=f"{MAIN_DIR}/Eye_disease/models/best_model.keras")
 APP = FastAPI()
@@ -30,32 +32,34 @@ async def get_form(request: Request):
     """
     return TEMPLATES.TemplateResponse("index.html", {"request": request})
 
+class ImageRequest(BaseModel):
+    image: str  # Base64-encoded string
+
 
 class PipelinePredictionAPI():
     def __init__(self):
         self.model = MODEL
 
-    async def pipeline(self, file: str) -> str:
+    async def pipeline(self, image:tf.Tensor) -> str:
         """
         Predict status for the provided image.
 
         Args:
-            text (str): the image path.
+            image: the tensor that represents the image.
 
         Returns:
             str: The prediction result or an error message.
         """
         try:
-            # Read the image file
-            # contents = await file.read()
-            # image = Image.open(io.BytesIO(contents)).convert("RGB")
-            # Ensure the text input is valid
-            print(file)
-            if not isinstance(file, str):
+            
+           
+            # Ensure the image input is valid
+            
+            if not isinstance(image, tf.Tensor):
                 raise ValueError("Invalid input: text must be a non-empty string.")
 
-            # Clean text
-            processed_image = Process_image.preprocess__image(file)
+            # process the image
+            processed_image = Process_image.preprocess__image(image)
             app_logger.info(f"successfully processed image")
 
             # Make prediction
@@ -71,21 +75,27 @@ class PipelinePredictionAPI():
 pipeline_api = PipelinePredictionAPI()
 
 @APP.post("/predict", response_class=HTMLResponse)
-async def predict_sentiment(request: Request, file: str = Form(...)):
+async def predict(request:Request,Image_request:ImageRequest):
     """
     POST method to handle sentiment prediction.
 
     Args:
         request (Request): The FastAPI request object.
-        text (str): The input text to analyze.
+        Image_request: The input Object that contains the image to analyze.
 
     Returns:
         HTMLResponse: The rendered HTML response with prediction results or error messages.
     """
-    # Read and encode the image as base64
-    with open(file, "rb") as image_file:
-        base64_image = base64.b64encode(image_file.read()).decode("utf-8")
+    # print(request)
+    base64_str = Image_request.image
+    
+    if ',' in base64_str:
+        base64_str = base64_str.split(',')[1]
+    image_data = base64.b64decode(base64_str)
+    print('decode image correctly')
+    tensor = tf.io.decode_image(image_data, channels=3)
+    print('converted to tensor ')
     # Run the prediction pipeline
-    prediction_result =await pipeline_api.pipeline(file)
+    prediction_result =await pipeline_api.pipeline(tensor)
     print(prediction_result)
-    return TEMPLATES.TemplateResponse("index.html",{"request":request,"result": prediction_result,"image_data": f"data:image/jpeg;base64,{base64_image}"})
+    return TEMPLATES.TemplateResponse("index.html",{"request":request,"result": prediction_result,})

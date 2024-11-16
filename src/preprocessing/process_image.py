@@ -11,46 +11,11 @@ import tensorflow as tf
 
 class Process_image():
 
-    def preprocess__image(path, data_augmentation=False):
+    def preprocess__image(image, data_augmentation=False):
         """
-        Preprocess a  image for prediction.
-
-        Args:
-            path (str): Path to the image.
-            data_augmentation (bool): Whether to apply data augmentation.
-
-        Returns:
-            tf.Tensor: Preprocessed image tensor.
+        Preprocess an image tensor for prediction.
         """
-        # Read the image file
-        image = tf.io.read_file(path)
-
-        # Extract file extension
-        file_extension = tf.strings.split(path, '.')[-1]
-
-        # Decode based on file extension using tf.cond
-        def decode_jpeg():
-            return tf.image.decode_jpeg(image, channels=3)
-
-        def decode_png():
-            return tf.image.decode_png(image, channels=3)
-
-        def decode_bmp():
-            return tf.image.decode_bmp(image, channels=3)
-
-        def decode_gif():
-            # Decode GIF and take the first frame
-            return tf.squeeze(tf.image.decode_gif(image), axis=0)
-
-        # Handle each format
-        image = tf.cond(tf.math.equal(file_extension, 'jpg'), decode_jpeg,
-                lambda: tf.cond(tf.math.equal(file_extension, 'jpeg'), decode_jpeg,
-                lambda: tf.cond(tf.math.equal(file_extension, 'png'), decode_png,
-                lambda: tf.cond(tf.math.equal(file_extension, 'bmp'), decode_bmp,
-                lambda: tf.cond(tf.math.equal(file_extension, 'gif'), decode_gif,
-                decode_jpeg)))))
-
-
+        print('we are here 1')
         # Resize and normalize
         image = tf.image.resize(image, [256, 256])
         image = image / 255.0  # Normalize to [0, 1] range
@@ -78,10 +43,8 @@ class Process_image():
 
         # Add batch dimension
         image = tf.expand_dims(image, axis=0)
-        
-        return image
-        
 
+        return image
 if __name__ == "__main__":
     iProcessImage = Process_image()
     clearn_text = iProcessImage.preprocess__image('')

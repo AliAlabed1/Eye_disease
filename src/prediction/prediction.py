@@ -62,13 +62,13 @@ class Prediction():
             predicted_label = class_labels[predicted_class_index]
             confidence = prediction[0][predicted_class_index]
 
-            app_logger.info(f"Prediction made successfully for input text.")
+            app_logger.info(f"Prediction made successfully for input image.")
 
             return f"Statues of Eye Image is: {predicted_label}, Confidence: {confidence:.2f}"
 
         except TypeError as type_err:
             app_logger.error(f"Type error during prediction: {type_err}")
-            return "Error: Invalid input type for model, tokenizer, or text."
+            return "Error: Invalid input type for model."
 
         except Exception as error:
             app_logger.error(f"An unexpected error occurred during prediction: {error}")
@@ -77,7 +77,7 @@ class Prediction():
 from model.load_model import LoadPreTrainedModel
 
 if __name__ == "__main__":
-    model = LoadPreTrainedModel().call(model_path="/workspaces/Sentiment-Analysis/models/final_sentiment_model.h5")
+    model = LoadPreTrainedModel().call(model_path="/workspaces/Eye_disease/models/best_model.keras")
     predict = Prediction().predict(model=model,image=tf.Tensor())
 
     print(predict)
