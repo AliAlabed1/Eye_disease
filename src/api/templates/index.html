@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload for Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+            text-align: center;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input[type="file"] {
+            display: block;
+            margin: 20px auto;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Image for Prediction</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="text" id="path" name="file"  required>
+            <button type="button" onclick="sendImage()">Predict</button>
+        </form>
+        {% if result %}
+            <div class="result-container">
+                <p class="result-title">Prediction Result:</p>
+                <p class="result-text">{{ result }}</p>
+            </div>
+        {% endif %}
+
+        {% if image_data %}
+            <img src="{{ image_data }}" alt="Uploaded Image" class="image-preview">
+        {% endif %}
+    </div>
+
+    <script>
+        async function sendImage() {
+            
+            const formData = new FormData();
+            const fileInput = document.getElementById('path');
+            const resultDiv = document.getElementById('result');
+            console.log(fileInput.value)
+            if (!fileInput.value) {
+                resultDiv.textContent = "Please paste the image path to predict.";
+                return;
+            }
+
+            formData.append('file', fileInput.value);
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Parse the result returned from the server
+                const html = await response.text();
+
+                // Replace the current HTML with the updated content
+                document.body.innerHTML = html;
+            } catch (error) {
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
